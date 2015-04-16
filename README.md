@@ -18,8 +18,7 @@ Dependent vars
 
 Weird problems...
 
-	Might need to install 32-bit libraries since aapt is 32-bit
-	(http://stackoverflow.com/questions/18928164/android-studio-cannot-find-aapt/18930424#18930424)
+	[Might need to install 32-bit libraries since aapt is 32-bit](http://stackoverflow.com/questions/18928164/android-studio-cannot-find-aapt/18930424#18930424)
 
 		sudo apt-get install lib32stdc++6
 		sudo apt-get install lib32z1
