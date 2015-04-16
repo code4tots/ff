@@ -62,4 +62,5 @@ ff_create_android_project() {
 		"$2" \
 		$PATH_TO_FF/MainActivity.java \
 		"$1"/src/"${2//\./\/}/"
+
 }
