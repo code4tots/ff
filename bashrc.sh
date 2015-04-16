@@ -17,7 +17,7 @@ lowercase() {
 }
 
 ff_build_grammar() {
-	(cd $PATH_TO_FF && java -jar $PATH_TO_ANTLR4 Ff.g4)
+	(cd "$PATH_TO_FF" && java -jar "$PATH_TO_ANTLR4" Ff.g4)
 }
 
 # "$1" --> package name
@@ -29,7 +29,7 @@ ff_copy_with_package() {
 }
 
 # "$1" --> create location (e.g. ./Sample)
-# "$2" --> package name (e.g. com.jj.my.awesome.app)
+# "$2" --> package name (e.g. com.ff.my.awesome.app)
 ff_create_android_project() {
 
 	ff_build_grammar
@@ -45,7 +45,7 @@ ff_create_android_project() {
 		rm -rf "$1"
 	fi
 
-	$PATH_TO_ANDROID_SDK/tools/android create project \
+	"$PATH_TO_ANDROID_SDK"/tools/android create project \
 		--target "android-22" \
 		--path "$1" \
 		--package "$2" \
@@ -58,9 +58,9 @@ ff_create_android_project() {
 		echo "successfully created android project"
 	fi
 
-	cp $PATH_TO_ANTLR4 "$1"/libs/
+	cp "$PATH_TO_ANTLR4" "$1"/libs/
 
-	for filename in $PATH_TO_FF/*.java; do
+	for filename in "$PATH_TO_FF"/*.java; do
 
 		ff_copy_with_package "$2" \
 			"$filename" \
@@ -68,4 +68,25 @@ ff_create_android_project() {
 
 	done
 
+}
+
+# "$1" --> package name (e.g. com.my.awesome.app)
+# "$2" --> ff file (e.g. MyProgram.ff)
+ff() {
+
+	if [ $# != 2 ]; then
+		echo "Usage: $0 <package name> <path to ff file>"
+		return 1
+	fi
+
+	local loc="$(basename "$2" .ff)"
+
+	ff_create_android_project "$loc" "$1" && \
+	mkdir "$loc"/assets && \
+	cp "$2" "$loc"/assets/script.ff && \
+	(cd "$loc" && ant debug && ant installd)
+}
+
+logcat() {
+	"$PATH_TO_ANDROID_SDK"/platform-tools/adb logcat
 }

@@ -1,6 +1,9 @@
 import java.util.HashMap;
 import java.util.ArrayList;
 
+import java.io.InputStream;
+import java.io.IOException;
+
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ANTLRInputStream;
@@ -15,6 +18,19 @@ public class FfCompiler {
 			System.exit(1);
 
 		System.out.println(ast);
+	}
+
+	public static FfRuntime.Dict parse(String string) {
+		return parse(new ANTLRInputStream(string));
+	}
+
+	public static FfRuntime.Dict parse(InputStream inputStream) {
+		try {
+			return parse(new ANTLRInputStream(inputStream));
+		}
+		catch (IOException e) {
+			return null;
+		}
 	}
 
 	public static FfRuntime.Dict parse(ANTLRInputStream inputStream) {
