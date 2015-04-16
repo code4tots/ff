@@ -2,9 +2,9 @@
 
 ########## local properties ##########
 
-PATH_TO_FF=~/git/hub/ff
-PATH_TO_ANTLR4=/usr/local/lib/antlr-4.5-complete.jar
-PATH_TO_ANDROID_SDK=~/git/pkg/android-sdk-linux
+PATH_TO_FF=${PATH_TO_FF:-~/git/hub/ff}
+PATH_TO_ANTLR4=${PATH_TO_ANTLR4:-/usr/local/lib/antlr-4.5-complete.jar}
+PATH_TO_ANDROID_SDK=${PATH_TO_ANDROID_SDK:-~/git/pkg/android-sdk-linux}
 
 ########## END local properties ##########
 
@@ -23,7 +23,7 @@ ff_build_grammar() {
 # "$1" --> package name
 # "$2" --> source java file
 # "$3" --> destination
-ff_move_with_package() {
+ff_copy_with_package() {
 	local dest="$3"/"$(basename "$2")"
 	printf "package $1;\n" > "$dest" && cat "$2" >> "$dest"
 }
@@ -58,9 +58,14 @@ ff_create_android_project() {
 		echo "successfully created android project"
 	fi
 
-	ff_move_with_package \
-		"$2" \
-		$PATH_TO_FF/MainActivity.java \
-		"$1"/src/"${2//\./\/}/"
+	cp $PATH_TO_ANTLR4 "$1"/libs/
+
+	for filename in $PATH_TO_FF/*.java; do
+
+		ff_copy_with_package "$2" \
+			"$filename" \
+			"$1"/src/"${2//\./\/}/"
+
+	done
 
 }
