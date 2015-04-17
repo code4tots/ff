@@ -20,3 +20,12 @@ Weird problems...
 	* sudo apt-get install lib32z1
 
 Seems to have been the case for 14.04, but not for 14.10.
+
+
+------------
+
+non-android version.
+
+javac FfTerminalRuntime.java && \
+echo "print('hello world'); screen.setChar('a', 0, 10);" \
+| java FfTerminalRuntime

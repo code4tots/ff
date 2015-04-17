@@ -25,7 +25,7 @@ public class MainActivity extends Activity {
 
 		scope.declareBuiltin(new FfRuntime.Builtin() {
 			public String getName() {
-				return "import";
+				return "importAndroid";
 			}
 
 			public Object call(FfRuntime.List args) {

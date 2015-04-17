@@ -5,6 +5,7 @@ import javax.swing.JFrame;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Color;
 
 public class FfTerminalRuntime extends JPanel {
 
@@ -38,6 +39,27 @@ public class FfTerminalRuntime extends JPanel {
 				buffer[x][y] = ' ';
 
 		FfRuntime.Scope scope = FfRuntime.declareBuiltins(new FfRuntime.GlobalScope());
+
+		FfRuntime.Dict screen = new FfRuntime.Dict();
+
+		screen.putBuiltin(new FfRuntime.Builtin() {
+
+				public String getName() {
+					return "setChar";
+				}
+
+				public Object call(FfRuntime.List args) {
+					String charStr = (String) args.get(0);
+					int x = Integer.parseInt((String) args.get(1));
+					int y = Integer.parseInt((String) args.get(2));
+					buffer[x][y] = charStr.charAt(0);
+					return charStr;
+				}
+
+		});
+
+		scope.declare("screen", screen);
+
 		FfRuntime.eval(scope, code);
 
 		font = new Font("Monospaced", Font.PLAIN, FONT_HEIGHT);
