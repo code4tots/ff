@@ -1,13 +1,16 @@
 // Assume everything is in the root package.
 
+import javax.swing.Timer;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Color;
-import java.awt.event.KeyListener;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 
 public class FfTerminalRuntime extends JComponent implements KeyListener {
 
@@ -140,6 +143,29 @@ public class FfTerminalRuntime extends JComponent implements KeyListener {
 			public Object call(FfRuntime.List args) {
 				keyTypedListener = (FfRuntime.Function) args.get(0);
 				return args.get(0);
+			}
+
+		});
+
+		screen.putBuiltin(new FfRuntime.Builtin() {
+
+			public String getName() {
+				return "onTimer";
+			}
+
+			public Object call(FfRuntime.List args) {
+				final FfRuntime.Function callback = (FfRuntime.Function) args.get(1);
+				Timer timer = new Timer(
+						Integer.parseInt((String) args.get(0)),
+						new ActionListener() {
+							public void actionPerformed(ActionEvent e) {
+								callback.call(new FfRuntime.List());
+							}
+						}
+				);
+				timer.setRepeats(false);
+				timer.start();
+				return callback;
 			}
 
 		});

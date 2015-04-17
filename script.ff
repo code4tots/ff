@@ -1,12 +1,11 @@
-BLACK := [1, 1, 1];
-WHITE := [0, 0, 0];
+WHITE := [1, 1, 1];
+BLACK := [0, 0, 0];
 RED := [1, 0, 0];
 GREEN := [0, 1, 0];
 BLUE := [0, 0, 1];
 
-screen.set(0, 0, 'c', [1, 0, 1], [0, 1, 0]);
+screen.set(0, 0, 'c', RED, GREEN);
 
-# screen.set(1, 1, 's', [1, 1, 1], [0, 0, 0]);
 
 screen.onKeyPress(\ {
 	print("A key was pressed!");
@@ -17,6 +16,11 @@ screen.onKeyRelease(\ {
 });
 
 screen.onKeyTyped(\ {
+	print(__args__);
 	print("A key was typed");
-	screen.set(1, 1, 's', [1, 1, 1], [0, 0, 0]);
+	screen.set(1, 1, 's', BLUE, BLACK);
+});
+
+screen.onTimer(10000, \ {
+	print("Timer went off after 10 seconds!");
 });
