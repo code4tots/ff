@@ -60,7 +60,9 @@ ff_create_android_project() {
 
 	cp "$PATH_TO_ANTLR4" "$1"/libs/
 
-	for filename in "$PATH_TO_FF"/*.java; do
+	for filename in "$PATH_TO_FF"/{ \
+			FfRuntime, FfCompiler, MainActivity \
+			FfLexer, FfBaseListener, FfListener, FfParser}.java; do
 
 		ff_copy_with_package "$2" \
 			"$filename" \
@@ -72,7 +74,7 @@ ff_create_android_project() {
 
 # "$1" --> package name (e.g. com.my.awesome.app)
 # "$2" --> ff file (e.g. MyProgram.ff)
-ff() {
+ff_android() {
 
 	if [ $# != 2 ]; then
 		echo "Usage: $0 <package name> <path to ff file>"
