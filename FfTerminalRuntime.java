@@ -6,8 +6,10 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Color;
+import java.awt.event.KeyListener;
+import java.awt.event.KeyEvent;
 
-public class FfTerminalRuntime extends JComponent {
+public class FfTerminalRuntime extends JComponent implements KeyListener {
 
 	public static void main(String[] args) {
 		new FfTerminalRuntime().run(FfCompiler.parse(System.in));
@@ -40,6 +42,8 @@ public class FfTerminalRuntime extends JComponent {
 
 	private Square[][] squares = new Square[NUMBER_OF_COLUMNS][NUMBER_OF_ROWS];
 
+	private FfRuntime.Function keyPressListener, keyReleaseListener, keyTypedListener;
+
 	public int getFontWidth() { return getWidth() / NUMBER_OF_COLUMNS; } // 10;
 	public int getFontHeight() { return getHeight() / NUMBER_OF_ROWS; } // ideally, width/height ~ 3/5
 	public int getFontSize() { return (int) (((double) getFontWidth()) * (5.0 / 3.0)); }
@@ -52,7 +56,7 @@ public class FfTerminalRuntime extends JComponent {
 		frame.setSize(800, 600);
 		frame.getContentPane().add(this);
 		frame.setVisible(true);
-
+		setFocusable(true);
 		setSize(800, 600);
 
 		for (int x = 0; x < NUMBER_OF_COLUMNS; x++)
@@ -62,6 +66,8 @@ public class FfTerminalRuntime extends JComponent {
 
 		FfRuntime.Scope scope = FfRuntime.declareBuiltins(new FfRuntime.GlobalScope());
 		FfRuntime.Dict screen = new FfRuntime.Dict();
+
+		addKeyListener(this);
 
 		screen.putBuiltin(new FfRuntime.Builtin() {
 
@@ -75,7 +81,7 @@ public class FfTerminalRuntime extends JComponent {
 				squares[x][y].character = ((String) args.get(2)).charAt(0);
 				squares[x][y].foreground = listToColor((FfRuntime.List) args.get(3));
 				squares[x][y].background = listToColor((FfRuntime.List) args.get(4));
-				invalidate();
+				repaint();
 				return args.get(2);
 			}
 
@@ -95,6 +101,45 @@ public class FfTerminalRuntime extends JComponent {
 						Character.toString(square.character),
 						colorToList(square.foreground),
 						colorToList(square.background));
+			}
+
+		});
+
+		screen.putBuiltin(new FfRuntime.Builtin() {
+
+			public String getName() {
+				return "onKeyPress";
+			}
+
+			public Object call(FfRuntime.List args) {
+				keyPressListener = (FfRuntime.Function) args.get(0);
+				return args.get(0);
+			}
+
+		});
+
+		screen.putBuiltin(new FfRuntime.Builtin() {
+
+			public String getName() {
+				return "onKeyRelease";
+			}
+
+			public Object call(FfRuntime.List args) {
+				keyReleaseListener = (FfRuntime.Function) args.get(0);
+				return args.get(0);
+			}
+
+		});
+
+		screen.putBuiltin(new FfRuntime.Builtin() {
+
+			public String getName() {
+				return "onKeyTyped";
+			}
+
+			public Object call(FfRuntime.List args) {
+				keyTypedListener = (FfRuntime.Function) args.get(0);
+				return args.get(0);
 			}
 
 		});
@@ -125,6 +170,21 @@ public class FfTerminalRuntime extends JComponent {
 				g.drawString(Character.toString(square.character), px, py + h);
 			}
 		}
+	}
+
+	public void keyPressed(KeyEvent e) {
+		if (keyPressListener != null)
+			keyPressListener.call(new FfRuntime.List());
+	}
+
+	public void keyReleased(KeyEvent e) {
+		if (keyReleaseListener != null)
+			keyReleaseListener.call(new FfRuntime.List());
+	}
+
+	public void keyTyped(KeyEvent e) {
+		if (keyTypedListener != null)
+			keyTypedListener.call(new FfRuntime.List());
 	}
 }
 

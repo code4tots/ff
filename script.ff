@@ -1,0 +1,22 @@
+BLACK := [1, 1, 1];
+WHITE := [0, 0, 0];
+RED := [1, 0, 0];
+GREEN := [0, 1, 0];
+BLUE := [0, 0, 1];
+
+screen.set(0, 0, 'c', [1, 0, 1], [0, 1, 0]);
+
+# screen.set(1, 1, 's', [1, 1, 1], [0, 0, 0]);
+
+screen.onKeyPress(\ {
+	print("A key was pressed!");
+});
+
+screen.onKeyRelease(\ {
+	print("A key was released!");
+});
+
+screen.onKeyTyped(\ {
+	print("A key was typed");
+	screen.set(1, 1, 's', [1, 1, 1], [0, 0, 0]);
+});

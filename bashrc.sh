@@ -29,7 +29,7 @@ ff_copy_with_package() {
 }
 
 # "$1" --> create location (e.g. ./Sample)
-# "$2" --> package name (e.g. com.ff.my.awesome.app)
+# "$2" --> package name (e.g. com.aff.my.awesome.app)
 ff_create_android_project() {
 
 	ff_build_grammar
@@ -73,7 +73,7 @@ ff_create_android_project() {
 }
 
 # "$1" --> package name (e.g. com.my.awesome.app)
-# "$2" --> ff file (e.g. MyProgram.ff)
+# "$2" --> ff file (e.g. MyProgram.aff)
 ff_android() {
 
 	if [ $# != 2 ]; then
@@ -81,11 +81,11 @@ ff_android() {
 		return 1
 	fi
 
-	local loc="$(basename "$2" .ff)"
+	local loc="$(basename "$2" .aff)"
 
 	ff_create_android_project "$loc" "$1" && \
 	mkdir "$loc"/assets && \
-	cp "$2" "$loc"/assets/script.ff && \
+	cp "$2" "$loc"/assets/script.aff && \
 	(cd "$loc" && ant debug && ant installd)
 }
 
