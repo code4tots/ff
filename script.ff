@@ -4,23 +4,26 @@ RED := [1, 0, 0];
 GREEN := [0, 1, 0];
 BLUE := [0, 0, 1];
 
-screen.set(0, 0, 'c', RED, GREEN);
+print(__add__(4, 5));
+
+world.set(0, 0, 'c', RED, GREEN);
 
 
-screen.onKeyPress(\ {
+world.onKeyPress(\ {
 	print("A key was pressed!");
 });
 
-screen.onKeyRelease(\ {
+world.onKeyRelease(\ {
 	print("A key was released!");
 });
 
-screen.onKeyTyped(\ {
+world.onKeyTyped(\ c {
 	print(__args__);
+	print(c, ord(c), chr(114));
 	print("A key was typed");
-	screen.set(1, 1, 's', BLUE, BLACK);
+	world.set(1, 1, 's', BLUE, BLACK);
 });
 
-screen.onTimer(10000, \ {
+world.onTimer(10000, \ {
 	print("Timer went off after 10 seconds!");
 });

@@ -172,7 +172,29 @@ public class FfRuntime {
 	}
 
 	public static Scope declareBuiltins(Scope scope) {
-	
+
+		scope.declareBuiltin(new Builtin() {
+
+			public String getName() {
+				return "chr";
+			}
+
+			public Object call(List args) {
+				return (char) Integer.parseInt((String) args.get(0));
+			}
+		});
+
+		scope.declareBuiltin(new Builtin() {
+
+			public String getName() {
+				return "ord";
+			}
+
+			public Object call(List args) {
+				return (int) ((String) args.get(0)).charAt(0);
+			}
+		});
+
 		scope.declareBuiltin(new Builtin() {
 
 			public String getName() {
@@ -181,14 +203,14 @@ public class FfRuntime {
 
 			public Object call(List args) {
 				if (args.size() > 0) {
-                    System.out.print(args.get(0));
-                    for (int i = 1; i < args.size(); i++) {
-                        System.out.print(" ");
-                        System.out.print(args.get(i));
-                    }
-                }
-                System.out.println();
-                return args.get(args.size() - 1);
+					System.out.print(args.get(0));
+					for (int i = 1; i < args.size(); i++) {
+						System.out.print(" ");
+						System.out.print(args.get(i));
+					}
+				}
+				System.out.println();
+				return args.get(args.size() - 1);
 			}
 		});
 
@@ -227,14 +249,82 @@ public class FfRuntime {
 			}
 
 			public Object call(List args) {
-				if (args.size() != 2)
-					throw new Error(args.toString());
-				Dict d = (Dict) args.get(0);
-				String n = (String) args.get(1);
-				return d.get(n);
+				if (args.get(0) instanceof Dict) {
+					Dict d = (Dict) args.get(0);
+					String i = (String) args.get(1);
+					return d.get(i);
+				}
+				else if (args.get(0) instanceof List) {
+					List d = (List) args.get(0);
+					int i = Integer.parseInt((String) args.get(1));
+					return d.get(i);
+				}
+				throw new Error();
 			}
+		});
+
+		scope.declareBuiltin(new Builtin() {
+
+			public String getName() {
+				return "__set__";
+			}
+
+			public Object call(List args) {
+				if (args.get(0) instanceof Dict) {
+					Dict d = (Dict) args.get(0);
+					String i = (String) args.get(1);
+					Object v = args.get(2);
+					d.put(i, v);
+					return v;
+				}
+				else if (args.get(0) instanceof List) {
+					List d = (List) args.get(0);
+					int i = Integer.parseInt((String) args.get(1));
+					Object v = args.get(2);
+					d.set(i, v);
+					return v;
+				}
+				throw new Error();
+			}
+
+		});
+
+		scope.declareBuiltin(new Builtin() {
+
+			public String getName() {
+				return "__add__";
+			}
+
+			public Object call(List args) {
+				return convert(
+					Double.parseDouble((String) args.get(0)) +
+					Double.parseDouble((String) args.get(1)));
+			}
+
+		});
+
+		scope.declareBuiltin(new Builtin() {
+
+			public String getName() {
+				return "__sub__";
+			}
+
+			public Object call(List args) {
+				return convert(
+					Double.parseDouble((String) args.get(0)) -
+					Double.parseDouble((String) args.get(1)));
+			}
+
 		});
 
 		return scope;
 	}
+
+	public static Object convert(Object x) {
+		if (x instanceof Double) {
+			return x.toString();
+		}
+		throw new Error();
+	}
+
 }

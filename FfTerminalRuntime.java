@@ -68,11 +68,11 @@ public class FfTerminalRuntime extends JComponent implements KeyListener {
 
 
 		FfRuntime.Scope scope = FfRuntime.declareBuiltins(new FfRuntime.GlobalScope());
-		FfRuntime.Dict screen = new FfRuntime.Dict();
+		FfRuntime.Dict world = new FfRuntime.Dict();
 
 		addKeyListener(this);
 
-		screen.putBuiltin(new FfRuntime.Builtin() {
+		world.putBuiltin(new FfRuntime.Builtin() {
 
 			public String getName() {
 				return "set";
@@ -90,7 +90,7 @@ public class FfTerminalRuntime extends JComponent implements KeyListener {
 
 		});
 
-		screen.putBuiltin(new FfRuntime.Builtin() {
+		world.putBuiltin(new FfRuntime.Builtin() {
 
 			public String getName() {
 				return "get";
@@ -108,7 +108,7 @@ public class FfTerminalRuntime extends JComponent implements KeyListener {
 
 		});
 
-		screen.putBuiltin(new FfRuntime.Builtin() {
+		world.putBuiltin(new FfRuntime.Builtin() {
 
 			public String getName() {
 				return "onKeyPress";
@@ -121,7 +121,7 @@ public class FfTerminalRuntime extends JComponent implements KeyListener {
 
 		});
 
-		screen.putBuiltin(new FfRuntime.Builtin() {
+		world.putBuiltin(new FfRuntime.Builtin() {
 
 			public String getName() {
 				return "onKeyRelease";
@@ -134,7 +134,7 @@ public class FfTerminalRuntime extends JComponent implements KeyListener {
 
 		});
 
-		screen.putBuiltin(new FfRuntime.Builtin() {
+		world.putBuiltin(new FfRuntime.Builtin() {
 
 			public String getName() {
 				return "onKeyTyped";
@@ -147,7 +147,7 @@ public class FfTerminalRuntime extends JComponent implements KeyListener {
 
 		});
 
-		screen.putBuiltin(new FfRuntime.Builtin() {
+		world.putBuiltin(new FfRuntime.Builtin() {
 
 			public String getName() {
 				return "onTimer";
@@ -170,7 +170,7 @@ public class FfTerminalRuntime extends JComponent implements KeyListener {
 
 		});
 
-		scope.declare("screen", screen);
+		scope.declare("world", world);
 		return FfRuntime.eval(scope, ast);
 	}
 
@@ -210,7 +210,7 @@ public class FfTerminalRuntime extends JComponent implements KeyListener {
 
 	public void keyTyped(KeyEvent e) {
 		if (keyTypedListener != null)
-			keyTypedListener.call(new FfRuntime.List());
+			keyTypedListener.call(new FfRuntime.List(Character.toString(e.getKeyChar())));
 	}
 }
 
