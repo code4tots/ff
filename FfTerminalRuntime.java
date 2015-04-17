@@ -1,82 +1,130 @@
 // Assume everything is in the root package.
 
-import javax.swing.JPanel;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Color;
 
-public class FfTerminalRuntime extends JPanel {
-
-	public static final int PIXEL_WDITH = 800;
-	public static final int PIXEL_HEIGHT = 600;
-
-	public static final int FONT_WIDTH = 10;
-	public static final int FONT_HEIGHT = 20; // ideally, width/height ~ 3/5
-
-	public static final int NUMBER_OF_COLUMNS = 80;
-	public static final int NUMBER_OF_ROWS = 30;
+public class FfTerminalRuntime extends JComponent {
 
 	public static void main(String[] args) {
 		new FfTerminalRuntime().run(FfCompiler.parse(System.in));
 	}
 
-	private Font font;
-	private char[][] buffer;
 
-	public void run(FfRuntime.Dict code) {
-		JFrame frame = new JFrame("Hello World Swing");
+	private static class Square {
+		public char character = ' ';
+		public Color foreground = Color.WHITE, background = Color.BLACK;
+	}
+
+	private static Color listToColor(FfRuntime.List list) {
+		float r = Float.parseFloat((String) list.get(0));
+		float g = Float.parseFloat((String) list.get(1));
+		float b = Float.parseFloat((String) list.get(2));
+		return new Color(r, g, b);
+	}
+
+	private static FfRuntime.List colorToList(Color color) {
+		return new FfRuntime.List(color.getRed() / 255.0, color.getGreen() / 255.0, color.getBlue() / 255.0);
+	}
+
+	// Originally I had planned on graphics just being 800 x 600.
+	// But I think it should actually scale to available size.
+	// public static final int PIXEL_WDITH = 800;
+	// public static final int PIXEL_HEIGHT = 600;
+
+	public static final int NUMBER_OF_COLUMNS = 80;
+	public static final int NUMBER_OF_ROWS = 30;
+
+	private Square[][] squares = new Square[NUMBER_OF_COLUMNS][NUMBER_OF_ROWS];
+
+	public int getFontWidth() { return getWidth() / NUMBER_OF_COLUMNS; } // 10;
+	public int getFontHeight() { return getHeight() / NUMBER_OF_ROWS; } // ideally, width/height ~ 3/5
+	public int getFontSize() { return (int) (((double) getFontWidth()) * (5.0 / 3.0)); }
+
+	public Font getFont() { return new Font("Monospaced", Font.PLAIN, getFontHeight()); }
+
+	public Object run(Object ast) {
+		JFrame frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
+		frame.setSize(800, 600);
 		frame.getContentPane().add(this);
+		frame.setVisible(true);
 
-		setPreferredSize(new Dimension(800, 600));
+		setSize(800, 600);
 
-		buffer = new char[NUMBER_OF_COLUMNS][NUMBER_OF_ROWS];
 		for (int x = 0; x < NUMBER_OF_COLUMNS; x++)
 			for (int y = 0; y < NUMBER_OF_ROWS; y++)
-				buffer[x][y] = ' ';
+				squares[x][y] = new Square();
+
 
 		FfRuntime.Scope scope = FfRuntime.declareBuiltins(new FfRuntime.GlobalScope());
-
 		FfRuntime.Dict screen = new FfRuntime.Dict();
 
 		screen.putBuiltin(new FfRuntime.Builtin() {
 
-				public String getName() {
-					return "setChar";
-				}
+			public String getName() {
+				return "set";
+			}
 
-				public Object call(FfRuntime.List args) {
-					String charStr = (String) args.get(0);
-					int x = Integer.parseInt((String) args.get(1));
-					int y = Integer.parseInt((String) args.get(2));
-					buffer[x][y] = charStr.charAt(0);
-					return charStr;
-				}
+			public Object call(FfRuntime.List args) {
+				int x = Integer.parseInt((String) args.get(0));
+				int y = Integer.parseInt((String) args.get(1));
+				squares[x][y].character = ((String) args.get(2)).charAt(0);
+				squares[x][y].foreground = listToColor((FfRuntime.List) args.get(3));
+				squares[x][y].background = listToColor((FfRuntime.List) args.get(4));
+				invalidate();
+				return args.get(2);
+			}
+
+		});
+
+		screen.putBuiltin(new FfRuntime.Builtin() {
+
+			public String getName() {
+				return "get";
+			}
+
+			public Object call(FfRuntime.List args) {
+				int x = Integer.parseInt((String) args.get(0));
+				int y = Integer.parseInt((String) args.get(1));
+				Square square = squares[x][y];
+				return new FfRuntime.List(
+						Character.toString(square.character),
+						colorToList(square.foreground),
+						colorToList(square.background));
+			}
 
 		});
 
 		scope.declare("screen", screen);
-
-		FfRuntime.eval(scope, code);
-
-		font = new Font("Monospaced", Font.PLAIN, FONT_HEIGHT);
-
-		frame.pack();
-		frame.setVisible(true);
+		return FfRuntime.eval(scope, ast);
 	}
 
 	public void paintComponent(Graphics g) {
-		g.setFont(font);
-		for (int x = 0; x < NUMBER_OF_COLUMNS; x++)
-			for (int y = 0; y < NUMBER_OF_ROWS; y++)
-				printChar(g, buffer[x][y], x, y);
-	}
+		g.setFont(getFont());
 
-	public static void printChar(Graphics g, char c, int x, int y) {
-		g.drawString(Character.toString(c), x * FONT_WIDTH, (y+1) * FONT_HEIGHT);
-	}
+		g.setColor(Color.BLACK);
+		g.fillRect(0, 0, getWidth(), getHeight());
 
+		int w = getFontWidth(), h = getFontHeight();
+		for (int x = 0; x < NUMBER_OF_COLUMNS; x++) {
+			for (int y = 0; y < NUMBER_OF_ROWS; y++) {
+				if (squares[x][y] == null)
+					squares[x][y] = new Square();
+
+				int px = x * w, py = y * h;
+				Square square = squares[x][y];
+
+				g.setColor(square.background);
+				g.fillRect(px, py, w, h);
+
+				g.setColor(square.foreground);
+				g.drawString(Character.toString(square.character), px, py + h);
+			}
+		}
+	}
 }
+

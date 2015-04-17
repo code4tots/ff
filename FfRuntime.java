@@ -7,14 +7,6 @@ import java.util.Scanner;
 @SuppressWarnings({"serial"})
 public class FfRuntime {
 
-	/// import builtins
-
-	private static HashMap<String, Builtin> importsMap = new HashMap<String, Builtin>();
-
-	public static void registerImport(Builtin builtin) {
-		importsMap.put(builtin.getName(), builtin);
-	}
-
 	/// eval
 
 	public static Object eval(Scope scope, Object d) {
@@ -203,6 +195,20 @@ public class FfRuntime {
 		scope.declareBuiltin(new Builtin() {
 
 			public String getName() {
+				return "__list__";
+			}
+
+			public Object call(List args) {
+				List d = new List();
+				for (int i = 0; i < args.size(); i++)
+					d.add(args.get(i));
+				return d;
+			}
+		});
+
+		scope.declareBuiltin(new Builtin() {
+
+			public String getName() {
 				return "__dict__";
 			}
 
@@ -227,19 +233,6 @@ public class FfRuntime {
 				String n = (String) args.get(1);
 				return d.get(n);
 			}
-		});
-
-		scope.declareBuiltin(new Builtin() {
-
-			public String getName() {
-				return "import";
-			}
-
-			public Object call(List args) {
-				String name = (String) args.get(0);
-				return importsMap.get(name).call(new List());
-			}
-
 		});
 
 		return scope;
