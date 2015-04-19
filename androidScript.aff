@@ -1,3 +1,5 @@
+# android.setPackage('com.jj.yo');
+
 android.onCreate(\ {
 
     android.setView(android.vertical(

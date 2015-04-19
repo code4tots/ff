@@ -61,7 +61,7 @@ ff_create_android_project() {
 
 	cp "$PATH_TO_ANTLR4" "$1"/libs/
 
-	for filename in "$PATH_TO_FF"/{FfRuntime,FfCompiler,MainActivity,MainService,FfLexer,FfBaseListener,FfListener,FfParser}.java; do
+	for filename in "$PATH_TO_FF"/{FfRuntime,FfCompiler,MainActivity,MainService,AndroidWidgetPlugin,AndroidAudioPlugin,FfLexer,FfBaseListener,FfListener,FfParser}.java; do
 
 		echo $filename
 
