@@ -23,46 +23,9 @@ public class MainActivity extends Activity {
 
 		scope = FfRuntime.declareBuiltins(new FfRuntime.GlobalScope());
 
-		scope.declareBuiltin(new FfRuntime.Builtin() {
-			public String getName() {
-				return "importAndroid";
-			}
+        scope.declare("android", createAndroidModule());
 
-			public Object call(FfRuntime.List args) {
-				String name = (String) args.get(0);
-				return
-					name.equals("android") ? createAndroidModule() :
-					name.equals("media") ? createMediaModule() :
-					"";
-			}
-		});
-
-		try {
-			String[] names = getAssets().list(".");
-			System.out.println("-------------------------------------------");
-			System.out.println("-------------------------------------------");
-			System.out.println("-------------------------------------------");
-			System.out.println("-------------------------------------------");
-			System.out.println("-------------------------------------------");
-			System.out.println("-------------------------------------------");
-			System.out.println("-------------------------------------------");
-			for (String name : names) {
-				System.out.println(name);
-			}
-			System.out.println("-------------------------------------------");
-			System.out.println("-------------------------------------------");
-			System.out.println("-------------------------------------------");
-			System.out.println("-------------------------------------------");
-			System.out.println("-------------------------------------------");
-			System.out.println("-------------------------------------------");
-			System.out.println("-------------------------------------------");
-			System.out.println("-------------------------------------------");
-			System.out.println("-------------------------------------------");
-			FfRuntime.eval(scope, FfCompiler.parse(getAssets().open("assets/script.ff")));
-		}
-		catch (IOException e) {
-			System.out.println(e);
-		}
+        FfRuntime.eval(scope, FfCompiler.parse(Program.CODE));
 
 		if (onCreateCallback != null)
 			onCreateCallback.call(new FfRuntime.List());
@@ -263,9 +226,5 @@ public class MainActivity extends Activity {
 			});
 			return lv;
 		}
-	}
-
-	private FfRuntime.Dict createMediaModule() {
-		return new FfRuntime.Dict();
 	}
 }

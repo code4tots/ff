@@ -30,6 +30,7 @@ ff_copy_with_package() {
 
 # "$1" --> create location (e.g. ./Sample)
 # "$2" --> package name (e.g. com.aff.my.awesome.app)
+# "$3" --> path to ff file
 ff_create_android_project() {
 
 	ff_build_grammar
@@ -60,15 +61,16 @@ ff_create_android_project() {
 
 	cp "$PATH_TO_ANTLR4" "$1"/libs/
 
-	for filename in "$PATH_TO_FF"/{ \
-			FfRuntime, FfCompiler, MainActivity \
-			FfLexer, FfBaseListener, FfListener, FfParser}.java; do
+	for filename in "$PATH_TO_FF"/{FfRuntime,FfCompiler,MainActivity,FfLexer,FfBaseListener,FfListener,FfParser}.java; do
 
 		ff_copy_with_package "$2" \
 			"$filename" \
-			"$1"/src/"${2//\./\/}/"
+			"$(echo "$1"/src/"${2//\.//}" | sed '#.#/#g')"/
 
 	done
+
+	printf "package $2;\n" > "$(echo "$1"/src/"${2//\.//}" | sed '#.#/#g')"/Program.java
+	cat "$3" | python "$PATH_TO_FF"/toProgram.py >> "$(echo "$1"/src/"${2//\.//}" | sed '#.#/#g')"/Program.java
 
 }
 
@@ -83,9 +85,7 @@ ff_android() {
 
 	local loc="$(basename "$2" .aff)"
 
-	ff_create_android_project "$loc" "$1" && \
-	mkdir "$loc"/assets && \
-	cp "$2" "$loc"/assets/script.aff && \
+	ff_create_android_project "$loc" "$1" "$2" && \
 	(cd "$loc" && ant debug && ant installd)
 }
 
