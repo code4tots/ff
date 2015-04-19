@@ -61,7 +61,9 @@ ff_create_android_project() {
 
 	cp "$PATH_TO_ANTLR4" "$1"/libs/
 
-	for filename in "$PATH_TO_FF"/{FfRuntime,FfCompiler,MainActivity,FfLexer,FfBaseListener,FfListener,FfParser}.java; do
+	for filename in "$PATH_TO_FF"/{FfRuntime,FfCompiler,MainActivity,MainService,FfLexer,FfBaseListener,FfListener,FfParser}.java; do
+
+		echo $filename
 
 		ff_copy_with_package "$2" \
 			"$filename" \
@@ -71,6 +73,9 @@ ff_create_android_project() {
 
 	printf "package $2;\n" > "$(echo "$1"/src/"${2//\.//}" | sed '#.#/#g')"/Program.java
 	cat "$3" | python "$PATH_TO_FF"/toProgram.py >> "$(echo "$1"/src/"${2//\.//}" | sed '#.#/#g')"/Program.java
+
+	sed -i 's$</activity>$</activity><service android:name="MainService" />$' "$1"/AndroidManifest.xml
+	sed -i 's$</application>$</application><uses-permission android:name="android.permission.INTERNET"/>$' "$1"/AndroidManifest.xml
 
 }
 

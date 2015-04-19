@@ -54,6 +54,8 @@ public class FfCompiler {
 		public static String NAME_DICT = "__dict__";
 		public static String NAME_GET = "__get__";
 		public static String NAME_SET = "__set__";
+		public static String NAME_EQ = "__eq__";
+		public static String NAME_ADD = "__add__";
 
 		private FfRuntime.Dict result;
 		private ArrayList<FfRuntime.List> stack;
@@ -145,17 +147,24 @@ public class FfCompiler {
 
 		@Override
 		public void exitIfElse(FfParser.IfElseContext ctx) {
-			push(makeIf(pop(), pop(), pop()));
+			Object elseBlock = pop();
+			Object ifBlock = pop();
+			Object cond = pop();
+			push(makeIf(cond, ifBlock, elseBlock));
 		}
 
 		@Override
 		public void exitIf_(FfParser.If_Context ctx) {
-			push(makeIf(pop(), pop(), makeStr("")));
+			Object ifBlock = pop();
+			Object cond = pop();
+			push(makeIf(cond, ifBlock, makeStr("")));
 		}
 
 		@Override
 		public void exitWhile_(FfParser.While_Context ctx) {
-			push(makeWhile(pop(), pop()));
+			Object body = pop();
+			Object cond = pop();
+			push(makeWhile(cond, body));
 		}
 
 		public static String processStringFragment(String string) {
@@ -249,6 +258,22 @@ public class FfCompiler {
 			FfRuntime.List args = popStack();
 			Object f = args.remove(0);
 			push(makeCall(f, args));
+		}
+
+		@Override
+		public void exitBinOp(FfParser.BinOpContext ctx) {
+			Object b = pop();
+			Object a = pop();
+			String op = ctx.op.getText();
+			if (op.equals("==")) {
+				push(makeCall(makeName(NAME_EQ), new FfRuntime.List(a, b)));
+			}
+			else if (op.equals("+")) {
+				push(makeCall(makeName(NAME_ADD), new FfRuntime.List(a, b)));
+			}
+			else {
+				throw new Error(op);
+			}
 		}
 
 		@Override

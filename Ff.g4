@@ -21,6 +21,7 @@ e: STR+ #str
  | e'['e']' #getItem
  | e'('(e(','e)*)?')' #call
  | '('e')' #par
+ | e op=('=='|'+') e #binOp
  | NAME ':=' e #decl
  | NAME '=' e #assign
  | e'.'NAME '=' e #attrAssign

@@ -2,33 +2,45 @@ import java.io.InputStream;
 import java.io.IOException;
 
 import android.app.Activity;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.content.ComponentName;
+import android.content.ServiceConnection;
+import android.content.Intent;
+import android.content.Context;
 
 
 public class MainActivity extends Activity {
 
 	private FfRuntime.Scope scope;
 	private FfRuntime.Function onCreateCallback;
+	private MainService service;
+	private ServiceConnection connection = new ServiceConnection() {
+		@Override
+		public void onServiceConnected(ComponentName className, IBinder binder) {
+			service = ((MainService.Binder) binder).getService();
+			if (onCreateCallback != null)
+				onCreateCallback.call(new FfRuntime.List());
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName className) {
+			service = null;
+		}
+	};
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		bindService(new Intent(this, MainService.class), connection, Context.BIND_AUTO_CREATE);
 		scope = FfRuntime.declareBuiltins(new FfRuntime.GlobalScope());
-
         scope.declare("android", createAndroidModule());
-
         FfRuntime.eval(scope, FfCompiler.parse(Program.CODE));
-
-		if (onCreateCallback != null)
-			onCreateCallback.call(new FfRuntime.List());
 	}
 
 	private View getRawView(FfRuntime.Dict wrappedView) {
@@ -91,9 +103,19 @@ public class MainActivity extends Activity {
 						return "setText";
 					}
 
-					public Object call(FfRuntime.List	args) {
+					public Object call(FfRuntime.List args) {
 						rawView.setText((String) args.get(0));
 						return args.get(0);
+					}
+				});
+				tv.putBuiltin(new FfRuntime.Builtin() {
+
+					public String getName() {
+						return "getText";
+					}
+
+					public Object call(FfRuntime.List args) {
+						return rawView.getText().toString();
 					}
 				});
 				return tv;
@@ -134,9 +156,19 @@ public class MainActivity extends Activity {
 						return "setText";
 					}
 
-					public Object call(FfRuntime.List	args) {
+					public Object call(FfRuntime.List args) {
 						rawView.setText((String) args.get(0));
 						return args.get(0);
+					}
+				});
+				bv.putBuiltin(new FfRuntime.Builtin() {
+
+					public String getName() {
+						return "getText";
+					}
+
+					public Object call(FfRuntime.List args) {
+						return rawView.getText().toString();
 					}
 				});
 				bv.putBuiltin(new FfRuntime.Builtin() {
@@ -179,6 +211,41 @@ public class MainActivity extends Activity {
 
 			public int getOrientation() {
 				return LinearLayout.HORIZONTAL;
+			}
+
+		});
+
+		android.putBuiltin(new FfRuntime.Builtin() {
+
+			public String getName() {
+				return "playAudio";
+			}
+
+			public Object call(FfRuntime.List args) {
+				return service.playAudio((String) args.get(0)) ? "1" : "";
+			}
+
+		});
+
+		android.putBuiltin(new FfRuntime.Builtin() {
+
+			public String getName() {
+				return "pauseAudio";
+			}
+
+			public Object call(FfRuntime.List args) {
+				return service.pauseAudio() ? "1" : "";
+			}
+
+		});
+		android.putBuiltin(new FfRuntime.Builtin() {
+
+			public String getName() {
+				return "resumeAudio";
+			}
+
+			public Object call(FfRuntime.List args) {
+				return service.resumeAudio() ? "1" : "";
 			}
 
 		});

@@ -3,6 +3,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Timer;
+import java.util.TimerTask;
 
 @SuppressWarnings({"serial"})
 public class FfRuntime {
@@ -172,6 +174,7 @@ public class FfRuntime {
 	}
 
 	public static Scope declareBuiltins(Scope scope) {
+		final Timer timer = new Timer();
 
 		scope.declareBuiltin(new Builtin() {
 
@@ -212,6 +215,25 @@ public class FfRuntime {
 				System.out.println();
 				return args.get(args.size() - 1);
 			}
+		});
+
+		scope.declareBuiltin(new Builtin() {
+
+			public String getName() {
+				return "setTimeout";
+			}
+
+			public Object call(List args) {
+				long delay = (long) (Double.parseDouble((String) args.get(0)) * 1000);
+				final Function callback = (Function) args.get(1);
+				timer.schedule(new TimerTask() {
+					public void run() {
+						callback.call(new List());
+					}
+				}, delay);
+				return callback;
+			}
+
 		});
 
 		scope.declareBuiltin(new Builtin() {
@@ -285,6 +307,18 @@ public class FfRuntime {
 					return v;
 				}
 				throw new Error();
+			}
+
+		});
+
+		scope.declareBuiltin(new Builtin() {
+
+			public String getName() {
+				return "__eq__";
+			}
+
+			public Object call(List args) {
+				return args.get(0).equals(args.get(1)) ? "1" : "";
 			}
 
 		});
